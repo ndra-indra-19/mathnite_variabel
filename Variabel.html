@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Online Mathnite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ✅ Tambahkan MathJax untuk menampilkan persamaan matematika -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+        }
+
+        .welcome-screen h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .welcome-screen p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .start-btn {
+            background: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.4s both;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .quiz-screen {
+            display: none;
+            padding: 40px;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-header h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .question-number {
+            color: #ff6b6b;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .option:hover {
+            border-color: #ff6b6b;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+        }
+
+        .option.correct {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        .option.incorrect {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback.correct {
+            background: #f0fdf4;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .results-screen, .failed-screen {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .results-screen h2 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .failed-screen {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="sound-correct" src="sounds/correct.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="sounds/incorrect.mp3" preload="auto"></audio>
+    <audio id="sound-finish" src="sounds/win.mp3" preload="auto"></audio>
+
+    <div class="container">
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1>🎯 Selamat Datang di Quiz Mathnite</h1>
+            <p>Jawablah setiap pertanyaan dengan benar untuk lanjut ke soal berikutnya!</p>
+            <button class="start-btn" onclick="startQuiz()">Mulai Quiz</button>
+        </div>
+
+        <div class="quiz-screen" id="quizScreen">
+            <div class="quiz-header">
+                <h2>Quiz Mathnite</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="questionCounter">Pertanyaan 1 dari 5</p>
+            </div>
+
+            <div class="question-card">
+                <div class="question-number" id="questionNumber">Pertanyaan 1</div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+                <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Konfirmasi</button>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+
+        <div class="results-screen" id="resultsScreen">
+            <h2>🎉 Quiz Selesai!</h2>
+            <h2>Kamu Berhak Mengambil 1 Kartu Milik Temanmu🥇</h2>
+            <div class="score" id="finalScore"></div>
+            <p id="scoreMessage"></p>
+        </div>
+
+        <div class="failed-screen" id="failedScreen">
+            <h2>❌ Maaf, kamu gagal! Berikan 1 kartumu ke temanmu 😞</h2>
+            <p>Jangan menyerah, tetap semangat 💪</p>
+        </div>
+    </div>
+
+    <script>
+        const correctSound = document.getElementById("sound-correct");
+        const wrongSound = document.getElementById("sound-wrong");
+        const finishSound = document.getElementById("sound-finish");
+
+        function playSound(sound) {
+            sound.pause();
+            sound.currentTime = 0;
+            sound.load();
+            sound.play().catch(e => console.log("⚠️ Gagal memutar suara:", e));
+        }
+
+        const questions = [
+            { question: "Apa yang dimaksud variabel ?", options: ["Angka yang nilainya selalu tetap", "Lambang atau huruf yang menyatakan nilai yang dapat berubah", "Simbol yang menunjukkan operasi tertentu dalam suatu persamaan", "Hasil dari suatu perhitungan"], correct: 1 },
+            { question: "Tentukan variabel dari \\( 6x + 3 \\) !", options: ["6", "4", "x", "Tidak ada"], correct: 2 },
+            { question: "Tentukan variabel dari \\( 2x^3 + 3y^2 - 6z + 4 \\) !", options: ["x ", "x dan y", "x, y, dan z", "2, 3, dan 6"], correct: 2 },
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let shuffledQuestions = [];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function shuffleQuestions(questions) {
+            return shuffleArray(questions).map(q => {
+                const optionsWithIndex = q.options.map((opt, i) => ({ opt, i }));
+                const shuffledOptions = shuffleArray(optionsWithIndex);
+                const newCorrectIndex = shuffledOptions.findIndex(o => o.i === q.correct);
+                return {
+                    question: q.question,
+                    options: shuffledOptions.map(o => o.opt),
+                    correct: newCorrectIndex
+                };
+            });
+        }
+
+        function startQuiz() {
+            shuffledQuestions = shuffleQuestions(questions);
+            currentQuestion = 0;
+            score = 0;
+
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = shuffledQuestions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pertanyaan ${currentQuestion + 1}`;
+            document.getElementById('questionText').innerHTML = q.question;
+            document.getElementById('questionCounter').textContent = `Pertanyaan ${currentQuestion + 1} dari ${shuffledQuestions.length}`;
+            MathJax.typeset();
+
+            document.getElementById('progressFill').style.width = ((currentQuestion + 1) / shuffledQuestions.length * 100) + '%';
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((option, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => selectOption(i, div);
+                optionsContainer.appendChild(div);
+            });
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('feedback').className = 'feedback';
+            selectedAnswer = null;
+        }
+
+        function selectOption(i, el) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedAnswer = i;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function submitAnswer() {
+            if (selectedAnswer === null) return;
+            const q = shuffledQuestions[currentQuestion];
+            const correctIndex = q.correct;
+            const isCorrect = selectedAnswer === correctIndex;
+            const options = document.querySelectorAll('.option');
+
+            options[correctIndex].classList.add('correct');
+            if (!isCorrect) {
+                options[selectedAnswer].classList.add('incorrect');
+                playSound(wrongSound);
+                showFailedScreen();
+                return;
+            }
+
+            playSound(correctSound);
+            showFeedback('🎉 Benar! Lanjut ke soal berikutnya...', 'correct');
+            score++;
+
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < shuffledQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function showFeedback(msg, type) {
+            const fb = document.getElementById('feedback');
+            fb.textContent = msg;
+            fb.className = `feedback ${type} show`;
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = `${score}/${shuffledQuestions.length}`;
+            document.getElementById('scoreMessage').textContent = score === shuffledQuestions.length ? '🌟 Sempurna!' : 'Bagus! Tapi belum sempurna.';
+            playSound(finishSound);
+        }
+
+        function showFailedScreen() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('failedScreen').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('failedScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
